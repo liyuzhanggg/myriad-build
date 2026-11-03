@@ -1,0 +1,24 @@
+name: build
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip
+        run: |
+          for f in *.zip; do unzip -o "$f"; done
+      - id: ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26d
+      - name: Build
+        env:
+          ANDROID_NDK: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          cd myriad-build
+          sh build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libmyriad
+          path: myriad-build/libmyriad.so
